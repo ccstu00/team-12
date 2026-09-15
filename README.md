@@ -1,4 +1,4 @@
-Jake Allen: jalleno5
+Jacob Allen: jalleno5
 Simon Tougas: sftougas
 Ann Marie Nguyen: annmarienguyen
 
