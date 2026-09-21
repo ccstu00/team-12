@@ -7,6 +7,10 @@ Ceana Tran: ccstu00
 - "done" means that a PR has been reviewed by at least one teammate, preferably all.
 - Meetings will scheduled for major disagreements, whilst minor disagreements will be resolved via Discord
 
+WHAT IS THIS PROJECT?:
+
+This project is a website specifically for UMass students to post and find items and services. Students can use the website to buy and sell, advertise different services, and find a sense of community. The goal is to give students a place to advertise and find things on campus without relying solely on social media.
+
 HOW TO RUN LOCALLY:
 
 PREREQUISITES:
