@@ -9,7 +9,7 @@ const entrySchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-const Entry = mongoose.model("Entry", entrySchema);
+export const Entry = mongoose.model("Entry", entrySchema);
 
 export const isValidId = (id) => mongoose.Types.ObjectId.isValid(id);
 
