@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "Jacob Allen: jalleno5 Simon Tougas: sftougas Ann Marie Nguyen: annmarienguyen Ceana Tran: ccstu00",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
-    "type": "module",
     "url": "git+https://github.com/ccstu00/team-12.git"
   },
   "keywords": [],
@@ -18,6 +18,8 @@
   },
   "homepage": "https://github.com/ccstu00/team-12#readme",
   "dependencies": {
-    "express": "^5.2.1"
+    "ejs": "^7.0.2",
+    "express": "^5.2.1",
+    "mongoose": "^9.11.2"
   }
 }
