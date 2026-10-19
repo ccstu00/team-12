@@ -1,6 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import postListingRouter from "./routes/postListing.js";
+import searchRouter from "./routes/search.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,6 +21,7 @@ app.get("/", (req, res) => {
   res.send("Team-12: UMASS Marketplace");
 });
 app.use("/listings", postListingRouter);
+app.use("/search", searchRouter);
 
 app.use((req, res) => {
   res.status(404).send("Page not found.");
