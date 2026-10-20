@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang = "en">
+  <head>
+    <title><%= title %></title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <script src = "/app.js" defer></script>
+  <body>
+    <main>
+      <h1><%= title %></h1>
+
+      <form method="POST" action= "/listings/classic">
+        <input name = "listing" placeholder="Listing" required>
+        <input name = "amount" type = "number" step = "0.01" placeholder="Amount" required>
+        <textarea name="description" placeholder="Description"></textarea>
+        <button type= "submit">Add listing</button>
+
+      </form>
+      <% if (entries.length === 0){ %>
+        <p> No listings yet.</p>
+      <%} else { %>
+      <ul>
+        <% entries.forEach(entry=>{ %>
+          <li data-id="<%= entry.id %>">
+          <div class="view">
+            <h2><%= entry.listing %></h2>
+            <p><%= entry.amount %></p>
+            <p><%= entry.description %></p>
+            <button type="button" class="delete-btn">Delete</button>
+            <button type="button" class="edit-btn">Edit</button>
+          </div>
+          <form class="edit-form" hidden>
+              <input name="listing" value= "<%= entry.listing %>" required>
+              <input name="amount" type="number" step="0.01" value="<%= entry.amount %>" required>
+              <textarea name="description"><%= entry.description %></textarea>
+              <button type="submit">Save</button>
+              <button type="button" class="cancel-btn">Cancel</button>
+          </form>
+          </li>
+        <% }) %>
+      </ul>
+      <% } %>
+    </main>
+  </body>
+</html>
