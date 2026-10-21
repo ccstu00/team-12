@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <%- include('partials/header') %>
+    <main>
+      <form method="GET" action="/search">
+        <input type="text" name="q" placeholder="Search listings" maxlength = "100" required>
+        <button type="submit">Search</button>
+      </form>
+
+      <% if (query) { %>
+        <p>"<%= query %>" (<%= entries.length %> results) </p>
+      <% } %>
+
+      <% if (entries.length === 0) { %>
+        <p>Sorry, no listings found.</p>
+      <% } else { %>
+      <ul>
+        <% entries.forEach((entry) => { %>
+          <li>
+          <%= entry.listing %>
+          <%= entry.amount %>
+          <%= entry.description %>
+          </li>
+        <% }); %>
+      </ul>
+      <% } %>
+    </main>
+    <script src="/app.js" defer></script>
+  </body>
+</html>
