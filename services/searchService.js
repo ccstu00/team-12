@@ -16,8 +16,8 @@ export const searchListings = async (q) => {
   const entries = await getAll();
   const matches = entries.filter(
     (entry) =>
-      entry.listing.toLowerCase().includes(search) ||
-      entry.description.toLowerCase().includes(search),
+      entry.listing?.toLowerCase().includes(search) ||
+      entry.description?.toLowerCase().includes(search),
   );
   return Ok(matches.map(toEntryDto));
 };
