@@ -28,6 +28,10 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, next) => {
+  //sprint 02 fix: malformed JSON gets a 400 error now
+  if (err.status >= 400 && err.status < 500) {
+    return res.status(err.status).json({ error: "Malformed JSON" });
+  }
   console.error(err);
   res.status(500).json({ error: "Internal server error" });
 });
