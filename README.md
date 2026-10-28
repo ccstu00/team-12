@@ -26,9 +26,9 @@ In your terminal:
 
 The server should be on http://localhost:3000 in your browser.
 
-HOW TO USE:
+## HOW TO USE:
 
-# Posting a listing:
+### Posting a listing:
 
 1. Go to http://localhost:3000/listings
 2. Fill in the form:
@@ -41,7 +41,7 @@ The page reloads and your listing shows up in the list below the form. If you le
 
 Each listing has an Edit button (change the name, price or description, then click Save) and a Delete button (asks you to confirm first).
 
-# Searching listings:
+### Searching listings:
 
 1. Go to http://localhost:3000/search
 2. Type a word into the search bar, like "lamp"
