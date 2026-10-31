@@ -95,6 +95,9 @@ describe("createEntry", () => {
     expect(result.ok).toBe(true);
     expect(result.value.amount).toBe(19.99);
   });
+});
+
+describe("updateEntry", () => {
 
 
 describe("updateEntry", () => {
