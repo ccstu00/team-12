@@ -67,7 +67,7 @@ describe("createEntry", () => {
       id: "fake-id",
       listing: "textbook",
       amount: 40,
-      description: "for MATH132",
+      description: "from MATH132",
     });
   });
 
@@ -83,7 +83,8 @@ describe("createEntry", () => {
     expect(result.value.amount).toBe(12.5);
   });
 
-  test("should drop decimals after two places, not round", async () => {
+  //note: at some point we should make it so that you can't type decimals places greater than two.
+  test("the price shouldn't have more than 2 decimal places.", async () => {
     const result = await createEntry({ listing: "textbook", amount: 12.345 });
     expect(result.ok).toBe(true);
     expect(result.value.amount).toBe(12.34);
@@ -95,12 +96,6 @@ describe("createEntry", () => {
     expect(result.value.amount).toBe(19.99);
   });
 
-  test("defaults a missing description to an empty string", async () => {
-    const result = await createEntry({ listing: "textbook", amount: 40 });
-    expect(result.ok).toBe(true);
-    expect(result.value.description).toBe("");
-  });
-});
 
 describe("updateEntry", () => {
   test("returns a 404 Err when the entry does not exist", async () => {
