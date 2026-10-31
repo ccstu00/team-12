@@ -98,9 +98,6 @@ describe("createEntry", () => {
 });
 
 describe("updateEntry", () => {
-
-
-describe("updateEntry", () => {
   test("returns a 404 Err when the entry does not exist", async () => {
     findById.mockResolvedValue(null);
     const result = await updateEntry("missing-id", {
