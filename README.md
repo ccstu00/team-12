@@ -87,6 +87,21 @@ Simon Tougas
   validation fails).
 ```
 
--
+SPRINT 03 DOCUMENTATION:
 
--
+1. MongoDB Repository:
+
+2. Jest Tests:
+   -postListing: Added `__tests__/postListingService.test.js`, with 21 unit tests for every rule in `services/postListingService.js`. The repository is mocked with `jest.unstable_mockModule`, so the tests doesn't need a running server or MongoDB connection and leave no data behind. `amount` now drops any decimals after two places instead of rounding, so `12.345` is saved as `12.34`.
+
+   How to see it:
+
+in your local terminal: run
+`npm install`
+`npm test`
+
+Jest lists any failed tests by name, then a summary of how many of the 21 passed. To run only this file, use `npm test -- postListingService`.
+
+1. ## HTMX interaction:
+
+2. Tailwind visual design:
