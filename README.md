@@ -106,6 +106,24 @@ Simon Tougas
   validation fails).
 ```
 
--
+SPRINT 03 DOCUMENTATION:
 
--
+1. MongoDB Repository:
+
+2. Jest Tests:
+   -postListing: Added `__tests__/postListingService.test.js`, in `services/postListingService.js`. The repository is mocked with `jest.unstable_mockModule`, so the tests doesn't need a running server or MongoDB connection and leave no data behind.
+
+Test file to run: `__tests__/postListingService.test.js`
+
+To run only this file, type this in a local terminal (`npm install` is only needed the first time):
+
+```
+npm install
+npm test -- postListingService
+```
+
+To run every test file in `__tests__`, including the search tests, use `npm test`.
+
+1. ## HTMX interaction:
+
+2. Tailwind visual design:
