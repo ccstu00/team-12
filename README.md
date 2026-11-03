@@ -144,9 +144,11 @@ Simon Tougas (Sprint 3): A design decision the team made for the Tailwind restyl
                  |                    |
   Controller postListingController searchController
                  |                    |
-  Service    postListingService    searchService
-             (validates listing)   (validates search, filters)
-                 |                    |
+  Service    postListingService    searchService      <-- Jest tests (__tests__/)
+             (validates listing)   (validates             postListingService.test.js
+                 |                  search, filters)      searchService.test.js
+                 |                    |                   repo mocked with jest,
+                 |                    |                   no database
   Repository postListingRepository <- searchRepository
                  |                 (uses the same Entry model)
                  v
@@ -155,4 +157,8 @@ Simon Tougas (Sprint 3): A design decision the team made for the Tailwind restyl
   The response goes back up the same path and the
   controller renders the page (or sends a 400 if
   validation fails).
+
+
+    Helpers: asyncHandler.js (wraps routes), result.js + dtos/entryDto.js
+  (used by services), views/partials/header.ejs, public/app.js (browser)
 ```
