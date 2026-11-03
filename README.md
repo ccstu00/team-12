@@ -53,6 +53,30 @@ You'll see what you searched and how many results came back, then every listing 
 
 ## SPRINT 3 CHANGES:
 
+### MongoDB
+
+Listings are stored in MongoDB through Mongoose. The schema is in `repositories/postListingRepository.js` (`listing` and `amount` required, `description` optional), and the repository uses per-record operations: `getAll`, `findById`, `create`, `updateById` and `removeById`. Search reuses the same `Entry` model in `repositories/searchRepository.js`. No other layer had to change, and there was no array-index id to fix, since the views already used the MongoDB `_id` from Sprint 2.
+
+To run it, open the project in the dev container and start Mongo before starting the server:
+
+```
+dc-up mongo
+npm install
+npm run build:css
+npm start
+```
+
+The server connects to `mongodb://dev:devpassword@mongo:27017/devdb` by default, or to `MONGODB_URI` if it's set.
+
+Routes that hit MongoDB:
+
+- `GET /listings`: loads every listing
+- `POST /listings/classic`: saves a new listing from the form
+- `PUT /listings/:id` and `DELETE /listings/:id`: edit or delete one listing by its MongoDB id
+- `GET /search?q=`: loads listings to search through
+
+To check it's really in the database: add a listing, stop the server with Ctrl+C, run `npm start` again, and the listing is still there.
+
 ### Tests
 
 Added Jest tests for the service layer. The repository is mocked with `jest.unstable_mockModule`, so the tests don't need the database running.
@@ -68,25 +92,29 @@ This runs every test file in the `__tests__` folder:
 
 - `__tests__/searchService.test.js`: checks that search rejects input that isn't text (400), returns every listing for a blank search, matches listing names regardless of case, and matches descriptions
 
-## Tailwind Visual Design
+- `__tests__/postListingService.test.js`: checks that posting rejects a missing listing name or a bad amount (400), that editing or deleting a listing that doesn't exist returns a 404, and that valid listings save correctly
+
+### Tailwind Visual Design
 
 The input file is src/input.css. In order to build the css, you must run the command: `npm run build:css`, or `npm run watch:css` for ongoing changes. All the different design choices were made using utility class within the views ejs files. The website can now be viewed in different screen sizes including desktop and mobile devices. For devices like phones the title of the pages stack above the nav links. The site switches to one row at the sm breakpoint 640 px. This can be found in views/partials/header.ejs. This is possible because of the viewport tag in both search.ejs and postListing.ejs.
 
 Some of the stylistic changes include:
-   -  Overall Layout
-      -  All displayed listings and content are centered. This is the case for both the listings and search features.
-   - Button Style Changes
-     - Search, add listing, and save are blue with a hover color.
-     - Edit and cancel are outlined in gray
-     - Delete is outlined in red
-   - Header Style Changes
-     - Bolded font
-     - Changed Spacing
-   - Listings
-     - colored white
-     - black borders
-     - Spacing between them
 
+- Overall Layout
+  - All displayed listings and content are centered. This is the case for both the listings and search features.
+- Button Style Changes
+  - Search, add listing, and save are blue with a hover color.
+  - Edit and cancel are outlined in gray
+  - Delete is outlined in red
+- Header Style Changes
+  - Bolded font
+  - Changed Spacing
+- Listings
+  - colored white
+  - black borders
+  - Spacing between them
+
+### HTMX
 
 DESIGN DECISIONS:
 
@@ -116,9 +144,11 @@ Simon Tougas (Sprint 3): A design decision the team made for the Tailwind restyl
                  |                    |
   Controller postListingController searchController
                  |                    |
-  Service    postListingService    searchService
-             (validates listing)   (validates search, filters)
-                 |                    |
+  Service    postListingService    searchService      <-- Jest tests (__tests__/)
+             (validates listing)   (validates             postListingService.test.js
+                 |                  search, filters)      searchService.test.js
+                 |                    |                   repo mocked with jest,
+                 |                    |                   no database
   Repository postListingRepository <- searchRepository
                  |                 (uses the same Entry model)
                  v
@@ -127,24 +157,8 @@ Simon Tougas (Sprint 3): A design decision the team made for the Tailwind restyl
   The response goes back up the same path and the
   controller renders the page (or sends a 400 if
   validation fails).
+
+
+    Helpers: asyncHandler.js (wraps routes), result.js + dtos/entryDto.js
+  (used by services), views/partials/header.ejs, public/app.js (browser)
 ```
-
-SPRINT 03 DOCUMENTATION:
-
-1. MongoDB Repository:
-
-2. Jest Tests:
-   -postListing: Added `__tests__/postListingService.test.js`, in `services/postListingService.js`. The repository is mocked with `jest.unstable_mockModule`, so the tests doesn't need a running server or MongoDB connection and leave no data behind.
-
-Test file to run: `__tests__/postListingService.test.js`
-
-To run only this file, type this in a local terminal (`npm install` is only needed the first time):
-
-```
-npm install
-npm test -- postListingService
-```
-
-To run every test file in `__tests__`, including the search tests, use `npm test`.
-
-1. ## HTMX interaction:
