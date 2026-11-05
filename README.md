@@ -130,6 +130,8 @@ Simon Tougas (Sprint 3): A design decision the team made for the Tailwind restyl
 
 - Ann Marie Nguyen: Our team used includes() to match search results. While testing the search bar, I created listings for “hat” and “chair.” Then I searched for “ha” in particular, which returned both listings since both words contain those letters in that order. It made me reconsider whether the search should match the text anywhere or only at the beginning, which is the difference between using includes() and startsWith(). While both includes() and startsWith() have their own tradeoffs, includes() is more flexible, whereas startsWith() is stricter. For example, an alternative like startsWith() would return “hat” for the search “ha,” but a search for “hat” would miss a listing like “green hat” because the listing starts with “green.” The tradeoff with using includes() would be returning unrelated listings like “chair” and as the number of posts increases, this can become an issue in terms of scaling. Even though includes() means some listings might not match what a user is looking for, it’s better to see everything and skip those listings manually than to use startsWith(), which would completely hide relevant listings just because they don’t match the start exactly.
 
+Ann Marie Nguyen (Sprint 3): Decided to add the delete operation with HTMX because it updates and makes the page interactive while reducing the amount of manual javascript. The alternative to delete an entry would be to write javascript, using fetch() to handle requests and requiring a full page reload. Using HTMX is helpful in this case because it needs less code and working with attributes can be faster. The alternative just adds more manual work.
+
 ## System Diagram
 
 ```
