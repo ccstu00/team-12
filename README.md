@@ -79,7 +79,17 @@ To check it's really in the database: add a listing, stop the server with Ctrl+C
 
 ### Tests
 
-Added Jest tests for the service layer. The repository is mocked with `jest.unstable_mockModule`, so the tests don't need the database running.
+for postListing: Added `__tests__/postListingService.test.js`, in `services/postListingService.js`. The repository is mocked with `jest.unstable_mockModule`, so the tests doesn't need a running server or MongoDB connection and leave no data behind.
+
+Run `__tests__/postListingService.test.js` to for postListing tests
+
+To run only this file, run
+`npm install`
+`npm test -- postListingService`
+
+To run every test file in `__tests__`, including the search tests, use `npm test`.
+
+for search implementation: Added Jest tests for the service layer. The repository is mocked with `jest.unstable_mockModule`, so the tests don't need the database running.
 
 To run them (`npm install` is only needed the first time, to install Jest):
 
