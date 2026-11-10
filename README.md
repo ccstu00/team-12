@@ -41,7 +41,7 @@ The server should be on http://localhost:3000 in your browser.
 
 The page reloads and your listing shows up in the list below the form. If you leave out the name or put in a bad price, the server sends back an error message instead of saving it.
 
-Each listing has an Edit button (change the name, price or description, then click Save) and a Delete button (asks you to confirm first).
+Each listing has an Edit button (change the name, price or description, then click Save) and a Delete button (asks you to confirm first, then removes the listing without reloading the page, using HTMX).
 
 ### Searching listings:
 
@@ -125,6 +125,10 @@ Some of the stylistic changes include:
   - Spacing between them
 
 ### HTMX
+
+The Delete button on `/listings` uses HTMX instead of a hand-written fetch and a full page reload. The button in `views/postListing.ejs` has `hx-delete`, `hx-target` and `hx-swap`, so after you confirm, it sends `DELETE /listings/:id` and only that listing gets removed from the page.
+
+To check it: add a listing on `/listings`, click Delete and confirm. The listing disappears without the page reloading, and the Network tab shows one `DELETE` request.
 
 DESIGN DECISIONS:
 
