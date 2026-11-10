@@ -8,12 +8,16 @@ import {
 } from "../repositories/postListingRepository.js";
 import { toEntryDto } from "../dtos/entryDto.js";
 
+// toFixed clears float error first: 19.99 * 100 is 1998.9999999999998
+const truncateToCents = (n) =>
+  Math.trunc(Number((n * 100).toFixed(6))) / 100;
+
 const validateEntry = ({ listing, amount, description = "" } = {}) => {
   if (!listing) return Err({ status: 400, message: "listing is required" });
   const n = Number(amount);
   if (amount === null || amount === "" || !Number.isFinite(n) || n < 0)
     return Err({ status: 400, message: "amount must be a number, 0 or more" });
-  return Ok({ listing, amount: Math.round(n * 100) / 100, description });
+  return Ok({ listing, amount: truncateToCents(n), description });
 };
 
 export const listEntries = async () => (await getAll()).map(toEntryDto);
