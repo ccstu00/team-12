@@ -16,10 +16,19 @@
       <h1 class="text-2xl font-bold mb-4"><%= title %></h1>
 
       <form method="POST" action= "/listings/classic" class="grid gap-3 max-w-[30rem]">
-        <input name = "listing" class="w-full px-4 py-2 border border-[#2b2a2a] rounded-[5px] bg-white" placeholder="Listing" required>
-        <input name = "amount" class="w-full px-4 py-2 border border-[#2b2a2a] rounded-[5px] bg-white" type = "number" step = "0.01" placeholder="Amount" required>
-        <textarea name="description" placeholder="Description" class="w-full px-4 py-2 border border-[#2b2a2a] rounded-[5px] bg-white"></textarea>
-        <button type= "submit" class="px-4 py-2 rounded-md bg-blue-700 text-white font-semibold hover:bg-blue-800 cursor-pointer">Add listing</button>
+        <label>
+          <span class="sr-only"></span>
+          <input name = "listing" class="w-full px-4 py-2 border border-[#2b2a2a] rounded-[5px] bg-white" placeholder="Listing" required>
+        </label>
+        <label>
+          <span class="sr-only">Amount</span>
+          <input name = "amount" class="w-full px-4 py-2 border border-[#2b2a2a] rounded-[5px] bg-white" type = "number" step = "0.01" placeholder="Amount" required>
+        </label>
+        <label>
+          <span class="sr-only">Description</span>
+          <textarea name="description" placeholder="Description" class="w-full px-4 py-2 border border-[#2b2a2a] rounded-[5px] bg-white"></textarea>
+        </label>
+        <button type= "submit" class="px-4 py-2 rounded-md bg-blue-700 text-white font-semibold hover:bg-blue-800 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">Add listing</button>
 
       </form>
       <% if (entries.length === 0){ %>
@@ -33,7 +42,7 @@
             <p><%= entry.amount %></p>
             <p><%= entry.description %></p>
             <div class="flex gap-2 mt-2">
-              <button type="button" class="delete-btn px-3 py-1 rounded-md border border-red-600 text-red-600 hover:bg-red-50 cursor-pointer"
+              <button type="button" class="delete-btn px-3 py-1 rounded-md border border-red-700 text-red-700 hover:bg-red-50 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
               hx-delete="/listings/<%= entry.id %>"
               hx-target="closest li"
               hx-swap="outerHTML"
@@ -41,16 +50,25 @@
               hx-disabled-elt="this"
               >Delete</button>
 
-              <button type="button" class="edit-btn px-3 py-1 rounded-md border border-gray-400 hover:bg-gray-100 cursor-pointer">Edit</button>
+              <button type="button" class="edit-btn px-3 py-1 rounded-md border border-gray-400 hover:bg-gray-100 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">Edit</button>
             </div>
           </div>
           <form class="edit-form grid gap-3 max-w-[30rem]" hidden>
-              <input name="listing" class="w-full px-4 py-2 border border-[#2b2a2a] rounded-[5px] bg-white" value= "<%= entry.listing %>" required>
-              <input name="amount" type="number" class="w-full px-4 py-2 border border-[#2b2a2a] rounded-[5px] bg-white" step="0.01" value="<%= entry.amount %>" required>
-              <textarea name="description" class="w-full px-4 py-2 border border-[#2b2a2a] rounded-[5px] bg-white"><%= entry.description %></textarea>
+              <label>
+                <span class="sr-only">Listing</span>
+                <input name="listing" class="w-full px-4 py-2 border border-[#2b2a2a] rounded-[5px] bg-white" value= "<%= entry.listing %>" required>
+              </label>
+              <label>
+                <span class="sr-only">Amount</span>
+                <input name="amount" type="number" class="w-full px-4 py-2 border border-[#2b2a2a] rounded-[5px] bg-white" step="0.01" value="<%= entry.amount %>" required>
+              </label>
+              <label>
+                <span class="sr-only">Description</span>
+                <textarea name="description" class="w-full px-4 py-2 border border-[#2b2a2a] rounded-[5px] bg-white"><%= entry.description %></textarea>
+              </label>
               <div class="flex gap-2 mt-2">
-                <button type="submit" class="px-4 py-2 rounded-md bg-blue-700 text-white font-semibold hover:bg-blue-800 cursor-pointer">Save</button>
-                <button type="button" class="cancel-btn px-4 py-2 rounded-md border border-gray-400 hover:bg-gray-100 cursor-pointer">Cancel</button>
+                <button type="submit" class="px-4 py-2 rounded-md bg-blue-700 text-white font-semibold hover:bg-blue-800 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">Save</button>
+                <button type="button" class="cancel-btn px-4 py-2 rounded-md border border-gray-400 hover:bg-gray-100 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">Cancel</button>
               </div>
 
           </form>
