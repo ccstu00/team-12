@@ -78,7 +78,7 @@ document.addEventListener("htmx:beforeSwap", (event)=>{
     return
   }
   const item = event.detail.target
-  const near = item.nextElementSibling || item.previousSibling
+  const near = item.nextElementSibling || item.previousElementSibling
 
   let next
   if(near){
@@ -87,5 +87,5 @@ document.addEventListener("htmx:beforeSwap", (event)=>{
   }else{
     next = document.querySelector('input[name="listing"]')
   }
-  setTimeout((next.focus(),0))
+  setTimeout(()=>next.focus(), 0)
 })
