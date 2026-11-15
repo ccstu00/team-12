@@ -2,6 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import postListingRouter from "./routes/postListing.js";
 import searchRouter from "./routes/search.js";
+import healthRouter from "./routes/health.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,10 +19,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 app.get("/", (req, res) => {
-  res.render("home", {title: "UMASS Marketplace"})
+  res.render("home", { title: "UMASS Marketplace" });
 });
 app.use("/listings", postListingRouter);
 app.use("/search", searchRouter);
+app.use("/health", healthRouter);
 
 app.use((req, res) => {
   res.status(404).send("Page not found.");
