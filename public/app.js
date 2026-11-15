@@ -17,10 +17,13 @@ document.addEventListener("click", (event) => {
 
   item.querySelector(".view").hidden = editing;
   item.querySelector(".edit-form").hidden = !editing;
+
+  if(editing){
+    item.querySelector(".edit-form input").focus()
+  }else{
+    item.querySelector(".edit-btn").focus()
+  }
 });
-
-
-
 
 document.addEventListener("submit", async (event) => {
   const form = event.target.closest(".edit-form");
@@ -48,6 +51,7 @@ document.addEventListener("submit", async (event) => {
     });
 
     if (response.ok) {
+      sessionStorage.setItem("focusListing", id)
       window.location.reload();
       return;
     }
@@ -59,3 +63,29 @@ document.addEventListener("submit", async (event) => {
     alert("Server not reached");
   }
 });
+
+const savedId = sessionStorage.getItem("focusListing")
+if(savedId){
+  sessionStorage.removeItem("focusListing")
+  const savedButton= document.querySelector('li[data-id="' + savedId + '"] .edit-btn')
+  if(savedButton){
+    savedButton.focus()
+  }
+}
+
+document.addEventListener("htmx:beforeSwap", (event)=>{
+  if(!event.detail.shouldSwap){
+    return
+  }
+  const item = event.detail.target
+  const near = item.nextElementSibling || item.previousElementSibling
+
+  let next
+  if(near){
+    next =near.querySelector(".delete-btn")
+
+  }else{
+    next = document.querySelector('input[name="listing"]')
+  }
+  setTimeout(()=>next.focus(), 0)
+})

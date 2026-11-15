@@ -18,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 app.get("/", (req, res) => {
-  res.send("Team-12: UMASS Marketplace");
+  res.render("home", {title: "UMASS Marketplace"})
 });
 app.use("/listings", postListingRouter);
 app.use("/search", searchRouter);

@@ -130,6 +130,64 @@ The Delete button on `/listings` uses HTMX instead of a hand-written fetch and a
 
 To check it: add a listing on `/listings`, click Delete and confirm. The listing disappears without the page reloading, and the Network tab shows one `DELETE` request.
 
+## SPRINT 4 Changes:
+
+### Accessibility Audit
+
+For the audit the team checked the home, search, and listing pages using only the keyboard and a contrast checker. Every control could be reached with Tab, but there was no clear focus outline, focus was lost after editing, saving, or deleting a listing, and the search page had no link. Two hover colors also fell just under the 4.5:1 contrast requirement.
+
+#### Issues found and fixed
+
+**1. No clear focus outline**
+
+- **Found:** Buttons and links had no clear focus indicator.
+- **Fix:** A blue 2px visible outline was added to every button and nav link.
+- **Check:** Tab through each page. Each button and link shows a visible outline in turn.
+
+**2. Search page and home page navigation**
+
+- **Found:** Could not navigate to `/search` from any of the pages, and home was a plain text page.
+- **Fix:** A Search link is now in the header, and the home page `/` is now a real page with the header.
+- **Check:** Open the home page `/`, press Tab to reach Search, and press Enter to open it.
+
+**3. Focus lost after Delete**
+
+- **Found:** After deleting a listing, focus was lost to the top of the page.
+- **Fix:** On the HTMX swap, focus moves to the next listing's Delete button, or the previous one, or the Listing field if no listings remain.
+- **Check:** Tab to Delete, press Enter, and confirm the deletion. The visible outline will be on a neighboring Delete button.
+
+**4. Focus lost after Edit or Cancel**
+
+- **Found:** After editing or canceling, the focus got lost.
+- **Fix:** The Edit button now moves the focus to the first field of the edit form. The Cancel button now returns the focus to that listing's Edit button.
+- **Check (Edit):** Press Enter on the Edit button. The focus will be on the Listing field.
+- **Check (Cancel):** Press Enter on the Cancel button. The visible outline will be on that listing's Edit button.
+
+**5. Focus lost after Save**
+
+- **Found:** After saving a listing, the focus went to the top of the page.
+- **Fix:** The saved listing's id is remembered across the reload and the focus is returned to its Edit button.
+- **Check:** Edit a listing, then press Enter on Save. The visible outline appears around the edited listing's Edit button.
+
+**6. Inputs had no labels**
+
+- **Found:** None of the inputs had a label.
+- **Fix:** Every input and textarea is now wrapped in a `<label>` with an `sr-only` span.
+- **Check:** Select any input in DevTools and open the Accessibility tab. "Name" shows the label text.
+
+**7. Hover contrast**
+
+- **Found:** The Delete hover and nav link hover measured about 4.4:1, under the 4.5:1 requirement.
+- **Fix:** Their colors were changed from `red-600` to `red-700`.
+- **Check:** Hover over Delete and each nav link and measure the text against its background with a contrast checker. The nav link hover now measures 5.91:1 and the Delete hover measures 5.86:1.
+
+#### Checked, no change needed
+
+- Body text
+- Blue buttons and their hover
+- Edit and Cancel hovers
+- Search and Add listing are full page loads, so the focus starts at the top of the new page.
+
 DESIGN DECISIONS:
 
 - Ceana Tran(Sprint 2): I can account for the postListing features’ layering. Transparently, I followed the Unit 11’s split for this feature’s layout, but there was an aspect of the code I modified to better fit the goals of this website which is in postListingRepository.js, with the entrySchema. In our team’s view, a marketplace listing typically requires two fields: the name of the listing and its price. The description is useful but unnecessary for the item to be posted on the marketplace. This version is better than forcing sellers to write an item description, because if there’s too many requirements in the way of posting the item, people wouldn’t be incentivized to post on our website as opposed to other marketplace sites. We could have also made the entry only require a title, but that means that the buyer has to message the seller about the price, which seems inefficient if a marketplace can’t display the price of the item on the posting itself. The schema rules live inside the postListingRepository because it must interact with the MongoDB database since it interacts with the entire marketplace’s database of listings, and the postListingRepository is the only file that imports MongoDB. A credible alternative to MongoDB is simply using JSON files. With JSON files, we can read and write data directly without having to connect to MongoDB or establishing an internet connection at all . This falls short to our current choice of using MongoDB, because the users must interact with one another on an established connection, and marketplace listings will be revised or posted on many machines, so at scale, reading and writing to JSON files would cause lost data under a website refresh, so if two people were to buy an item at the same time, it would cause unnecessary user complaints on lost money and ownership of the sold item.
@@ -140,9 +198,11 @@ Ceana Tran(Sprint 3): I used mockRepository because we'd have to run a real data
 
 Jacob Allen (Sprint 3): Search tests use a mocked repository instead of a real database. The other option was testing against a real MongoDB with test listings inserted. I went with the mock because the tests only need to check the search rules, and they run instantly with no database. The real database version would make everyone run Mongo just to run npm test and would leave test listings behind in the database.
 
--Simon Tougas(Sprint 2): We chose to put validation of entry field rules for posting listings into only the service layer. The alternative to this would be to split the validation between the service and controller layers for the post feature. Entry validation in the controller layer could benefit the service layer by rejecting bad input before it reaches the service layer. We kept the rules in the service layer because it will help us moving forward when it comes to testing the feature. A service function only needs to pass an object for the programmer to test the results, whereas the controller needs to build test req and res objects in order to test validation. Keeping validation of entry fields avoids the need for building convoluted tests. Also, create and createClassic both call createEntry, if the rules were in the controller, each rule would have to be written twice. If a programmer forgot to write them twice, create and createClassic would quietly enforce different sets of rules.
+- Simon Tougas(Sprint 2): We chose to put validation of entry field rules for posting listings into only the service layer. The alternative to this would be to split the validation between the service and controller layers for the post feature. Entry validation in the controller layer could benefit the service layer by rejecting bad input before it reaches the service layer. We kept the rules in the service layer because it will help us moving forward when it comes to testing the feature. A service function only needs to pass an object for the programmer to test the results, whereas the controller needs to build test req and res objects in order to test validation. Keeping validation of entry fields avoids the need for building convoluted tests. Also, create and createClassic both call createEntry, if the rules were in the controller, each rule would have to be written twice. If a programmer forgot to write them twice, create and createClassic would quietly enforce different sets of rules.
 
-Simon Tougas (Sprint 3): A design decision the team made for the Tailwind restyle was gitignoring output.css. The alternative to this would be to commit public/output.css to main which would allow a fresh clone to run. The version the team chose is better than the alternative because during the process of completing this sprint multiple people will be working with style classes. If a person forgets to update output.css problems such as an unstyled page will arise when an out of date output.css is merged into main. Problems would also come up when it came time for merging branches, any two branches that change styling would risk a merge conflict in output.css, a file that is not designed to be read. The conflict would not be fixed by deleting a couple lines, a group member would have to delete it and run the build command again. Overall, the direction the team decided is better to avoid potential problems with the main drawback being running an extra command.
+- Simon Tougas (Sprint 3): A design decision the team made for the Tailwind restyle was gitignoring output.css. The alternative to this would be to commit public/output.css to main which would allow a fresh clone to run. The version the team chose is better than the alternative because during the process of completing this sprint multiple people will be working with style classes. If a person forgets to update output.css problems such as an unstyled page will arise when an out of date output.css is merged into main. Problems would also come up when it came time for merging branches, any two branches that change styling would risk a merge conflict in output.css, a file that is not designed to be read. The conflict would not be fixed by deleting a couple lines, a group member would have to delete it and run the build command again. Overall, the direction the team decided is better to avoid potential problems with the main drawback being running an extra command.
+
+- Simon Tougas (Sprint 4): Labels are used to help screen readers announce each field. I chose to use only sr-only labels which kept the labels hidden from view. I could have used visible labels above every field such as displaying the labels with bolded font. I believe my choice fits the app better because the placeholders for search and add-listing fields already show the same words. In the edit form, which has no placeholders, the fields are prefilled with the listing’s current name, price and description, so a user can still tell what each field is for.  If I had used the visible labels there would have been duplicate text on screen and the layout of the forms would have changed. For example, the edit form would be taller for each listing card.
 
 - Ann Marie Nguyen: Our team used includes() to match search results. While testing the search bar, I created listings for “hat” and “chair.” Then I searched for “ha” in particular, which returned both listings since both words contain those letters in that order. It made me reconsider whether the search should match the text anywhere or only at the beginning, which is the difference between using includes() and startsWith(). While both includes() and startsWith() have their own tradeoffs, includes() is more flexible, whereas startsWith() is stricter. For example, an alternative like startsWith() would return “hat” for the search “ha,” but a search for “hat” would miss a listing like “green hat” because the listing starts with “green.” The tradeoff with using includes() would be returning unrelated listings like “chair” and as the number of posts increases, this can become an issue in terms of scaling. Even though includes() means some listings might not match what a user is looking for, it’s better to see everything and skip those listings manually than to use startsWith(), which would completely hide relevant listings just because they don’t match the start exactly.
 
