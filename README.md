@@ -219,24 +219,25 @@ Ann Marie Nguyen (Sprint 3): Decided to add the delete operation using HTMX beca
 ## System Diagram
 
 ```
-            Browser (postListing.ejs, search.ejs)
+            Browser (home.ejs, postListing.ejs, search.ejs)
                  |                    |                   |
           /listings              /search?q=            /health
                  |                    |                   |
                  v                    v                   v
-            server.js (mounts the three routers, error handler)
+            server.js (renders home.ejs for /, mounts the three routers, error handler)
                  |                    |                   |
-  Routes     postListing.js        search.js          health.js
+Routes      postListing.js        search.js          health.js
                  |                    |                   |
-  Controller postListingController searchController  healthController
+Controller  postListingController searchController  healthController
                  |                    |             (sends {"status":"ok"},
                  |                    |              no service or database)
-  Service    postListingService    searchService      <-- Jest tests (__tests__/)
+                 |                    |
+Service     postListingService    searchService      <-- Jest tests (__tests__/)
              (validates listing)   (validates             postListingService.test.js
                  |                  search, filters)      searchService.test.js
                  |                    |                   repo mocked with jest,
                  |                    |                   no database
-  Repository postListingRepository <- searchRepository
+Repository  postListingRepository <- searchRepository
                  |                 (uses the same Entry model)
                  v
               MongoDB
