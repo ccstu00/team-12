@@ -188,21 +188,29 @@ For the audit the team checked the home, search, and listing pages using only th
 - Edit and Cancel hovers
 - Search and Add listing are full page loads, so the focus starts at the top of the new page.
 
+### Health check
+
+`GET /health` returns a small JSON status so you can check the app is running. It's mounted in `server.js` before the other routes, so it works without logging in.
+
+- **Check:** With the server running, run `curl -i http://localhost:3000/health`. It returns a `200` with `Content-Type: application/json` and a body like `{"status":"ok","uptime":3.69}`.
+
 DESIGN DECISIONS:
 
 - Ceana Tran(Sprint 2): I can account for the postListing features’ layering. Transparently, I followed the Unit 11’s split for this feature’s layout, but there was an aspect of the code I modified to better fit the goals of this website which is in postListingRepository.js, with the entrySchema. In our team’s view, a marketplace listing typically requires two fields: the name of the listing and its price. The description is useful but unnecessary for the item to be posted on the marketplace. This version is better than forcing sellers to write an item description, because if there’s too many requirements in the way of posting the item, people wouldn’t be incentivized to post on our website as opposed to other marketplace sites. We could have also made the entry only require a title, but that means that the buyer has to message the seller about the price, which seems inefficient if a marketplace can’t display the price of the item on the posting itself. The schema rules live inside the postListingRepository because it must interact with the MongoDB database since it interacts with the entire marketplace’s database of listings, and the postListingRepository is the only file that imports MongoDB. A credible alternative to MongoDB is simply using JSON files. With JSON files, we can read and write data directly without having to connect to MongoDB or establishing an internet connection at all . This falls short to our current choice of using MongoDB, because the users must interact with one another on an established connection, and marketplace listings will be revised or posted on many machines, so at scale, reading and writing to JSON files would cause lost data under a website refresh, so if two people were to buy an item at the same time, it would cause unnecessary user complaints on lost money and ownership of the sold item.
 
 Ceana Tran(Sprint 3): I used mockRepository because we'd have to run a real database live, and there's also the additional step of removing the test listings after the test cases have been run in the database, which can be tedious. The mockRepository is a throwaway repository and doesn't leave anything behind to remove later, which makes it faster to test. For the truncating cents update, this is more optimal because the alternative, which was rounding the decimal place if the decimal place was 5 or greater, doesn't make sense because it should cap at 2 decimals which make the other numbers invalid. Next sprint, I'll make it so that the user can only type up to 2 decimals instead of dropping decimals, because it's strange to be able to type more than 2 decimals for cash. If a seller saw the rounding policy, it would be strange because it would be different from other marketplaces that cannot have greater than 2 decimal places, and for the user, they would be confused if they show the price for more than what they typed in, say 3.456 to 3.46 instead.
 
-- Jacob Allen: Blank search shows everything. If someone searches with nothing typed in, the service returns every listing instead of an error. The other option was treating a blank search like bad input and sending back a 400 saying a search term is required. I went with showing everything because going to the search page with nothing typed should just be a 'browsing' mode, not an error. The 400 version would make users type something just to see what’s for sale, and the frontend would need extra handling for that error, so ultimately having a blank search show everything was the way to go for our application.
+- Jacob Allen (Sprint 2): Blank search shows everything. If someone searches with nothing typed in, the service returns every listing instead of an error. The other option was treating a blank search like bad input and sending back a 400 saying a search term is required. I went with showing everything because going to the search page with nothing typed should just be a 'browsing' mode, not an error. The 400 version would make users type something just to see what’s for sale, and the frontend would need extra handling for that error, so ultimately having a blank search show everything was the way to go for our application.
 
-Jacob Allen (Sprint 3): Search tests use a mocked repository instead of a real database. The other option was testing against a real MongoDB with test listings inserted. I went with the mock because the tests only need to check the search rules, and they run instantly with no database. The real database version would make everyone run Mongo just to run npm test and would leave test listings behind in the database.
+- Jacob Allen (Sprint 3): Search tests use a mocked repository instead of a real database. The other option was testing against a real MongoDB with test listings inserted. I went with the mock because the tests only need to check the search rules, and they run instantly with no database. The real database version would make everyone run Mongo just to run npm test and would leave test listings behind in the database.
+
+- Jacob Allen (Sprint 4): I gave the health check its own route and controller instead of just writing app.get("/health") in server.js. The inline version would be fewer files, but every other feature in our app has its own route and controller, and server.js only mounts routers. Putting it inline would make server.js the only file with route logic in it, so anyone looking for how a route works would have to check two places instead of just controllers/.
 
 - Simon Tougas(Sprint 2): We chose to put validation of entry field rules for posting listings into only the service layer. The alternative to this would be to split the validation between the service and controller layers for the post feature. Entry validation in the controller layer could benefit the service layer by rejecting bad input before it reaches the service layer. We kept the rules in the service layer because it will help us moving forward when it comes to testing the feature. A service function only needs to pass an object for the programmer to test the results, whereas the controller needs to build test req and res objects in order to test validation. Keeping validation of entry fields avoids the need for building convoluted tests. Also, create and createClassic both call createEntry, if the rules were in the controller, each rule would have to be written twice. If a programmer forgot to write them twice, create and createClassic would quietly enforce different sets of rules.
 
 - Simon Tougas (Sprint 3): A design decision the team made for the Tailwind restyle was gitignoring output.css. The alternative to this would be to commit public/output.css to main which would allow a fresh clone to run. The version the team chose is better than the alternative because during the process of completing this sprint multiple people will be working with style classes. If a person forgets to update output.css problems such as an unstyled page will arise when an out of date output.css is merged into main. Problems would also come up when it came time for merging branches, any two branches that change styling would risk a merge conflict in output.css, a file that is not designed to be read. The conflict would not be fixed by deleting a couple lines, a group member would have to delete it and run the build command again. Overall, the direction the team decided is better to avoid potential problems with the main drawback being running an extra command.
 
-- Simon Tougas (Sprint 4): Labels are used to help screen readers announce each field. I chose to use only sr-only labels which kept the labels hidden from view. I could have used visible labels above every field such as displaying the labels with bolded font. I believe my choice fits the app better because the placeholders for search and add-listing fields already show the same words. In the edit form, which has no placeholders, the fields are prefilled with the listing’s current name, price and description, so a user can still tell what each field is for.  If I had used the visible labels there would have been duplicate text on screen and the layout of the forms would have changed. For example, the edit form would be taller for each listing card.
+- Simon Tougas (Sprint 4): Labels are used to help screen readers announce each field. I chose to use only sr-only labels which kept the labels hidden from view. I could have used visible labels above every field such as displaying the labels with bolded font. I believe my choice fits the app better because the placeholders for search and add-listing fields already show the same words. In the edit form, which has no placeholders, the fields are prefilled with the listing’s current name, price and description, so a user can still tell what each field is for. If I had used the visible labels there would have been duplicate text on screen and the layout of the forms would have changed. For example, the edit form would be taller for each listing card.
 
 - Ann Marie Nguyen: Our team used includes() to match search results. While testing the search bar, I created listings for “hat” and “chair.” Then I searched for “ha” in particular, which returned both listings since both words contain those letters in that order. It made me reconsider whether the search should match the text anywhere or only at the beginning, which is the difference between using includes() and startsWith(). While both includes() and startsWith() have their own tradeoffs, includes() is more flexible, whereas startsWith() is stricter. For example, an alternative like startsWith() would return “hat” for the search “ha,” but a search for “hat” would miss a listing like “green hat” because the listing starts with “green.” The tradeoff with using includes() would be returning unrelated listings like “chair” and as the number of posts increases, this can become an issue in terms of scaling. Even though includes() means some listings might not match what a user is looking for, it’s better to see everything and skip those listings manually than to use startsWith(), which would completely hide relevant listings just because they don’t match the start exactly.
 
@@ -211,26 +219,29 @@ Ann Marie Nguyen (Sprint 3): Decided to add the delete operation using HTMX beca
 ## System Diagram
 
 ```
-            Browser (postListing.ejs, search.ejs)
+            Browser (home.ejs, postListing.ejs, search.ejs)
+                 |                    |                   |
+          /listings              /search?q=            /health
+                 |                    |                   |
+                 v                    v                   v
+            server.js (renders home.ejs for /, mounts the three routers, error handler)
+                 |                    |                   |
+Routes      postListing.js        search.js          health.js
+                 |                    |                   |
+Controller  postListingController searchController  healthController
+                 |                    |             (sends {"status":"ok"},
+                 |                    |              no service or database)
                  |                    |
-          /listings              /search?q=
-                 |                    |
-                 v                    v
-            server.js (mounts both routers, error handler)
-                 |                    |
-  Routes     postListing.js        search.js
-                 |                    |
-  Controller postListingController searchController
-                 |                    |
-  Service    postListingService    searchService      <-- Jest tests (__tests__/)
+Service     postListingService    searchService      <-- Jest tests (__tests__/)
              (validates listing)   (validates             postListingService.test.js
                  |                  search, filters)      searchService.test.js
                  |                    |                   repo mocked with jest,
                  |                    |                   no database
-  Repository postListingRepository <- searchRepository
+Repository  postListingRepository <- searchRepository
                  |                 (uses the same Entry model)
                  v
               MongoDB
+
 
   The response goes back up the same path and the
   controller renders the page (or sends a 400 if
