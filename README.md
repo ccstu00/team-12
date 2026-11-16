@@ -220,16 +220,17 @@ Ann Marie Nguyen (Sprint 3): Decided to add the delete operation using HTMX beca
 
 ```
             Browser (postListing.ejs, search.ejs)
-                 |                    |
-          /listings              /search?q=
-                 |                    |
-                 v                    v
-            server.js (mounts both routers, error handler)
-                 |                    |
-  Routes     postListing.js        search.js
-                 |                    |
-  Controller postListingController searchController
-                 |                    |
+                 |                    |                   |
+          /listings              /search?q=            /health
+                 |                    |                   |
+                 v                    v                   v
+            server.js (mounts the three routers, error handler)
+                 |                    |                   |
+  Routes     postListing.js        search.js          health.js
+                 |                    |                   |
+  Controller postListingController searchController  healthController
+                 |                    |             (sends {"status":"ok"},
+                 |                    |              no service or database)
   Service    postListingService    searchService      <-- Jest tests (__tests__/)
              (validates listing)   (validates             postListingService.test.js
                  |                  search, filters)      searchService.test.js
@@ -239,6 +240,7 @@ Ann Marie Nguyen (Sprint 3): Decided to add the delete operation using HTMX beca
                  |                 (uses the same Entry model)
                  v
               MongoDB
+
 
   The response goes back up the same path and the
   controller renders the page (or sends a 400 if
