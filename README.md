@@ -219,12 +219,14 @@ Ann Marie Nguyen (Sprint 3): Decided to add the delete operation using HTMX beca
 ## System Diagram
 
 ```
-            Browser (home.ejs, postListing.ejs, search.ejs)
+            Browser (home.ejs, login.ejs, signup.ejs, postListing.ejs, search.ejs)
                  |                    |                   |
           /listings              /search?q=            /health
                  |                    |                   |
                  v                    v                   v
-            server.js (renders home.ejs for /, mounts the three routers, error handler)
+            server.js (renders home.ejs for /, mounts the routers, error handler)
+            + express-session with connect-mongo (signed cookie, SESSION_SECRET)
+            + attachUser middleware (reads req.session.userId, sets req.user)
                  |                    |                   |
 Routes      postListing.js        search.js          health.js
                  |                    |                   |
@@ -240,7 +242,26 @@ Service     postListingService    searchService      <-- Jest tests (__tests__/)
 Repository  postListingRepository <- searchRepository
                  |                 (uses the same Entry model)
                  v
-              MongoDB
+              MongoDB (listings, users, sessions)
+
+
+        Browser -> server.js -> Auth (/signup, /login, /logout, /me)
+                      |
+Routes            auth.js
+                      |
+Controller        authController    (starts the session on signup and login,
+                      |              destroys it on logout, /me reads
+                      |              usersRepository directly)
+                      |
+Service           authService       (bcrypt.hash on signup, bcrypt.compare on
+                      |              login, role always defaults to member)
+                      |
+Repository        usersRepository   <-- also used by attachUser
+                      |
+Model             models/userModel.js (User: email, passwordHash,
+                      |                role member or admin, default member)
+                      v
+            MongoDB (same database as above)
 
 
   The response goes back up the same path and the
@@ -249,5 +270,6 @@ Repository  postListingRepository <- searchRepository
 
 
     Helpers: asyncHandler.js (wraps routes), result.js + dtos/entryDto.js
-  (used by services), views/partials/header.ejs, public/app.js (browser)
+  + dtos/userDto.js (used by services), views/partials/header.ejs,
+  public/app.js (browser)
 ```
