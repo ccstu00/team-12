@@ -33,10 +33,11 @@ app.use(attachUser);
 app.use(authRouter);
 
 app.get("/", (req, res) => {
-  res.send("Team-12: UMASS Marketplace");
+  res.render("home", { title: "UMASS Marketplace" });
 });
 app.use("/listings", postListingRouter);
 app.use("/search", searchRouter);
+app.use("/health", healthRouter);
 
 app.use((req, res) => {
   res.status(404).send("Page not found.");
