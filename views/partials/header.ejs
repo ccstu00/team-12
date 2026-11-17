@@ -3,5 +3,16 @@
   <nav class="flex gap-4">
     <a href="/" class="hover:text-red-600">Home</a>
     <a href="/listings" class="hover:text-red-600">Add Listing</a>
+
+    <% if (locals.user) { %>
+      <span id="signed-in" class="text-gray-700">Signed in as <%= user.email %></span>
+      <%# Logging out changes state, so it is a POST from a form, never a link. %>
+      <form method="POST" action="/logout">
+        <button type="submit" id="logout" class="hover:text-red-600">Log out</button>
+      </form>
+    <% } else { %>
+      <a href="/login" id="login-link" class="hover:text-red-600">Log in</a>
+      <a href="/signup" id="signup-link" class="hover:text-red-600">Sign up</a>
+    <% } %>
   </nav>
 </header>
