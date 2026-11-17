@@ -3,7 +3,7 @@
   <nav class="flex gap-4">
     <a href="/" class="hover:text-red-600">Home</a>
     <a href="/listings" class="hover:text-red-600">Add Listing</a>
-
+    <a href="/search" class="hover:text-read-600">Search</a>
     <% if (locals.user) { %>
       <span id="signed-in" class="text-gray-700">Signed in as <%= user.email %></span>
       <%# Logging out changes state, so it is a POST from a form, never a link. %>
