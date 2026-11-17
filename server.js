@@ -2,7 +2,10 @@ import express from "express";
 import mongoose from "mongoose";
 import postListingRouter from "./routes/postListing.js";
 import searchRouter from "./routes/search.js";
-import healthRouter from "./routes/health.js";
+import authRouter from "./routes/auth.js";
+import session from 'express-session';
+import MongoStore from 'connect-mongo';
+import { attachUser } from './middleware/attachUser.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,6 +20,17 @@ app.set("view engine", "ejs");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
+
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'dev-secret-change-in-production',
+  resave: false,
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_URI || 'mongodb://dev:devpassword@mongo:27017/devdb?authSource=admin',
+  }),
+}));
+app.use(attachUser);
+app.use(authRouter);
 
 app.get("/", (req, res) => {
   res.render("home", { title: "UMASS Marketplace" });
