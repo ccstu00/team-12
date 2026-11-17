@@ -5,6 +5,7 @@ import searchRouter from "./routes/search.js";
 import authRouter from "./routes/auth.js";
 import session from 'express-session';
 import MongoStore from 'connect-mongo';
+import healthRouter from "./routes/health.js"
 import { attachUser } from './middleware/attachUser.js';
 
 const app = express();
