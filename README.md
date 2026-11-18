@@ -194,11 +194,51 @@ For the audit the team checked the home, search, and listing pages using only th
 
 - **Check:** With the server running, run `curl -i http://localhost:3000/health`. It returns a `200` with `Content-Type: application/json` and a body like `{"status":"ok","uptime":3.69}`.
 
+### Authorization
+
+Updated so that anyone can view site listings. Logged in users can post, modify, or edit their own postings, with admins/moderators being able to modify anything that the users can make.
+
+To create an admin/ moderator: Signup always creates a `member`. A `role` field sent with the signup form is ignored. To make an admin, sign up then go to:
+
+```
+mongosh "mongodb://dev:devpassword@mongo:27017/devdb?authSource=admin" --eval 'db.users.updateOne({ email: "ann@umass.edu" }, { $set: { role: "admin" } })'
+```
+
+The new role will be applied after the user's next request. For tests, the tests for creating usernames (and one admin) are as follows:
+
+```
+curl -X POST http://localhost:3000/signup -H "Content-Type: application/json" -d '{"email":"simon@umass.edu","password":"simontougs"}'
+curl -X POST http://localhost:3000/signup -H "Content-Type: application/json" -d '{"email":"jacob@umass.edu","password":"jacoba11en67"}'
+curl -X POST http://localhost:3000/signup -H "Content-Type: application/json" -d '{"email":"ann@umass.edu","password":"annmarienguy3n"}'
+```
+
+Given these criteria, tests for the users and admins should return the following:
+
+1. **NO account: `401`:**
+   `curl -i -X POST http://localhost:3000/listings -H "Content-Type: application/json" -d '{"listing":"lamp","amount":5}'`
+2. **Jacob creates a listing: `201`.** Copy the `id` from the response:
+   `curl -c jacob.txt -X POST http://localhost:3000/login -H "Content-Type: application/json" -d '{"email":"jacob@umass.edu","password":"jacoba11en67"}'`
+   `curl -b jacob.txt -X POST http://localhost:3000/listings -H "Content-Type: application/json" -d '{"listing":"lamp","amount":5}'`
+3. **Simon tries to edit and delete it: `403` both instances:**
+   `curl -c simon.txt -X POST http://localhost:3000/login -H "Content-Type: application/json" -d '{"email":"simon@umass.edu","password":"simontougs"}'`
+   `curl -i -b simon.txt -X PUT http://localhost:3000/listings/<id> -H "Content-Type: application/json" -d '{"listing":"mine now","amount":1}'`
+   `curl -i -b simon.txt -X DELETE http://localhost:3000/listings/<id>`
+   Open `/listings` to confirm the lamp is still there, unchanged.
+4. **Ann deletes it: `200`:**
+   `curl -c ann.txt -X POST http://localhost:3000/login -H "Content-Type: application/json" -d '{"email":"ann@umass.edu","password":"annmarienguy3n"}'`
+   `curl -i -b ann.txt -X DELETE http://localhost:3000/listings/<id>`
+
+In the browser: log in as Jacob in one window and as Simon in a private window, and have each add a listing. Each user sees Edit and Delete only on their own listing. Logged in as Ann (the admin), you see them on every listing.
+
+To test: run `npm test`, which runs `__tests__/postListingService.test.js` (`describe("authorization")`) with the repositories mocked and no database needed. A nonowner gets the `403` on update and delete, the owner and an admin succeed, and the owner always comes from the logged-in user.
+
 DESIGN DECISIONS:
 
 - Ceana Tran(Sprint 2): I can account for the postListing features’ layering. Transparently, I followed the Unit 11’s split for this feature’s layout, but there was an aspect of the code I modified to better fit the goals of this website which is in postListingRepository.js, with the entrySchema. In our team’s view, a marketplace listing typically requires two fields: the name of the listing and its price. The description is useful but unnecessary for the item to be posted on the marketplace. This version is better than forcing sellers to write an item description, because if there’s too many requirements in the way of posting the item, people wouldn’t be incentivized to post on our website as opposed to other marketplace sites. We could have also made the entry only require a title, but that means that the buyer has to message the seller about the price, which seems inefficient if a marketplace can’t display the price of the item on the posting itself. The schema rules live inside the postListingRepository because it must interact with the MongoDB database since it interacts with the entire marketplace’s database of listings, and the postListingRepository is the only file that imports MongoDB. A credible alternative to MongoDB is simply using JSON files. With JSON files, we can read and write data directly without having to connect to MongoDB or establishing an internet connection at all . This falls short to our current choice of using MongoDB, because the users must interact with one another on an established connection, and marketplace listings will be revised or posted on many machines, so at scale, reading and writing to JSON files would cause lost data under a website refresh, so if two people were to buy an item at the same time, it would cause unnecessary user complaints on lost money and ownership of the sold item.
 
 Ceana Tran(Sprint 3): I used mockRepository because we'd have to run a real database live, and there's also the additional step of removing the test listings after the test cases have been run in the database, which can be tedious. The mockRepository is a throwaway repository and doesn't leave anything behind to remove later, which makes it faster to test. For the truncating cents update, this is more optimal because the alternative, which was rounding the decimal place if the decimal place was 5 or greater, doesn't make sense because it should cap at 2 decimals which make the other numbers invalid. Next sprint, I'll make it so that the user can only type up to 2 decimals instead of dropping decimals, because it's strange to be able to type more than 2 decimals for cash. If a seller saw the rounding policy, it would be strange because it would be different from other marketplaces that cannot have greater than 2 decimal places, and for the user, they would be confused if they show the price for more than what they typed in, say 3.456 to 3.46 instead.
+
+Ceana Tran (Sprint 4): I put the check for who can edit or delete a listing inside postListingService.js instead of making a separate middleware on the route. The alternative was a requireOwner middleware that looks up the listing before the controller runs, which would also stop Simon from deleting Jacob's listing. I went with the service because updateEntry and deleteEntry already look up the listing to send a 404 if it doesn't exist, so checking the owner right after that doesn't need another trip to the database, and the 404 and the 403 come back the same way. It also made it easy to test, since we already mock the repository from Sprint 3, so the test just has to check that a non-owner gets a 403 and the owner and the admin don't, without running a real database. requireLogin still goes on the route, because checking if someone is logged in doesn't need the listing at all. If we had used the middleware, every edit and delete would look up the listing twice, and if someone added a new route later and forgot the middleware, any logged-in user could change anyone's listing, which is a bigger problem for a marketplace where people's prices and items are on the line. Next sprint, I'd like to show the user a clearer message on the page when they get a 403 instead of just an alert, because it's confusing to click something and have nothing happen.
 
 - Jacob Allen (Sprint 2): Blank search shows everything. If someone searches with nothing typed in, the service returns every listing instead of an error. The other option was treating a blank search like bad input and sending back a 400 saying a search term is required. I went with showing everything because going to the search page with nothing typed should just be a 'browsing' mode, not an error. The 400 version would make users type something just to see what’s for sale, and the frontend would need extra handling for that error, so ultimately having a blank search show everything was the way to go for our application.
 
