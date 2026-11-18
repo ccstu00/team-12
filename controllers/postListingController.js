@@ -2,13 +2,17 @@ import * as postListingService from "../services/postListingService.js";
 import { isValidId } from "../repositories/postListingRepository.js";
 
 export const index = async (req, res) => {
-  const entries = await postListingService.listEntries();
+  // ---------------
+  const entries = await postListingService.listEntriesForPage(req.user);
+  // ---------------
   res.set("X-Total-Count", entries.length);
   res.status(200).render("postListing", { title: "Listings", entries });
 };
 
 export const create = async (req, res) => {
-  const result = await postListingService.createEntry(req.body);
+  // ---------------
+  const result = await postListingService.createEntry(req.body, req.user);
+  // ---------------
   if (!result.ok) {
     res.status(result.error.status).json({ error: result.error.message });
     return;
@@ -17,7 +21,9 @@ export const create = async (req, res) => {
 };
 
 export const createClassic = async (req, res) => {
-  const result = await postListingService.createEntry(req.body);
+  // ---------------
+  const result = await postListingService.createEntry(req.body, req.user);
+  // ---------------
   if (!result.ok) {
     res.status(result.error.status).send(result.error.message);
     return;
@@ -31,7 +37,9 @@ export const update = async (req, res) => {
     res.status(400).json({ error: "id must be a valid id" });
     return;
   }
-  const result = await postListingService.updateEntry(id, req.body);
+  // ---------------
+  const result = await postListingService.updateEntry(id, req.body, req.user);
+  // ---------------
   if (!result.ok) {
     res.status(result.error.status).json({ error: result.error.message });
     return;
@@ -45,7 +53,9 @@ export const destroy = async (req, res) => {
     res.status(400).json({ error: "id must be a valid id" });
     return;
   }
-  const result = await postListingService.deleteEntry(id);
+  // ---------------
+  const result = await postListingService.deleteEntry(id, req.user);
+  // ---------------
   if (!result.ok) {
     res.status(result.error.status).json({ error: result.error.message });
     return;
