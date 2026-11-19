@@ -260,27 +260,31 @@ Ann Marie Nguyen (Sprint 3): Decided to add the delete operation using HTMX beca
 
 ```
             Browser (home.ejs, login.ejs, signup.ejs, postListing.ejs, search.ejs)
-                 |                    |                   |
-          /listings              /search?q=            /health
-                 |                    |                   |
-                 v                    v                   v
+                 |                      |                   |
+          /listings                 /search?q=            /health
+                 |                      |                   |
+                 v                      v                   v
             server.js (renders home.ejs for /, mounts the routers, error handler)
             + express-session with connect-mongo (signed cookie, SESSION_SECRET)
             + attachUser middleware (reads req.session.userId, sets req.user)
-                 |                    |                   |
-Routes      postListing.js        search.js          health.js
-                 |                    |                   |
-Controller  postListingController searchController  healthController
-                 |                    |             (sends {"status":"ok"},
-                 |                    |              no service or database)
-                 |                    |
-Service     postListingService    searchService      <-- Jest tests (__tests__/)
-             (validates listing)   (validates             postListingService.test.js
-                 |                  search, filters)      searchService.test.js
-                 |                    |                   repo mocked with jest,
-                 |                    |                   no database
+                 |                      |                   |
+Routes      postListing.js         search.js          health.js
+            (requireLogin on            |                   |
+             POST/PUT/DELETE)           |                   |
+                 |                      |                   |
+Controller  postListingController   searchController    healthController
+                 |                      |             (sends {"status":"ok"},
+                 |                      |              no service or database)
+                 |                      |
+Service     postListingService      searchService      <-- Jest tests (__tests__/)
+             (validates listing,    (validates            postListingService.test.js
+              isOwnerOrAdmin        search, filters)      (incl. owner/admin 403 tests)
+              check -> 403)             |                 searchService.test.js
+                 |                      |                 repos mocked with jest,
+                 |                      |                 no database
 Repository  postListingRepository <- searchRepository
-                 |                 (uses the same Entry model)
+            (Entry has ownerId)    (uses the same Entry model)
+                 |
                  v
               MongoDB (listings, users, sessions)
 
@@ -296,7 +300,8 @@ Controller        authController    (starts the session on signup and login,
 Service           authService       (bcrypt.hash on signup, bcrypt.compare on
                       |              login, role always defaults to member)
                       |
-Repository        usersRepository   <-- also used by attachUser
+Repository        usersRepository   <-- also used by attachUser, and by
+                      |                 postListingService to look up admin role
                       |
 Model             models/userModel.js (User: email, passwordHash,
                       |                role member or admin, default member)
@@ -306,7 +311,9 @@ Model             models/userModel.js (User: email, passwordHash,
 
   The response goes back up the same path and the
   controller renders the page (or sends a 400 if
-  validation fails).
+  validation fails, a 401 from requireLogin if not
+  logged in, or a 403 from the service if you don't
+  own the listing and aren't an admin).
 
 
     Helpers: asyncHandler.js (wraps routes), result.js + dtos/entryDto.js
