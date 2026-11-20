@@ -2,13 +2,15 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><%= title %></title>
+    <link rel="stylesheet" href="/output.css">
     <link rel="stylesheet" href="/style.css">
   </head>
-  <body>
+  <body class="bg-[#f3f6f8] text-[#1b2430] font-sans leading-loose">
     <%- include('partials/header') %>
-    <main>
-      <h2 class="text-lg font-bold mb-4">Log in</h2>
+    <main class= "max-w-[45rem] mx-auto px-4 py-8">
+      <h1 class="text-2xl font-bold mb-4">Log in</h1>
       <%# A plain form: logging in changes the whole page, so it posts and the
           server answers with a redirect (Post/Redirect/Get), or this page again
           with the error. %>
@@ -17,17 +19,17 @@
           <p id="form-error" role="alert" class="text-red-700"><%= error %></p>
         <% } %>
         <label for="login-email" class="flex flex-col gap-1">Email
-          <input type="email" id="login-email" name="email" value="<%= email %>" autocomplete="email" required class="form-input">
+          <input type="email" id="login-email" name="email" value="<%= email %>" autocomplete="email" required class="w-full px-4 py-2 border border-[#2b2a2a] rounded-[5px] bg-white">
         </label>
         <label for="login-password" class="flex flex-col gap-1">Password
-          <input type="password" id="login-password" name="password" autocomplete="current-password" required class="form-input">
+          <input type="password" id="login-password" name="password" autocomplete="current-password" required class="w-full px-4 py-2 border border-[#2b2a2a] rounded-[5px] bg-white">
         </label>
         <label for="login-remember" class="flex gap-2 items-center">
           <input type="checkbox" id="login-remember" name="rememberMe"> Remember me for 30 days
         </label>
-        <button type="submit" id="login-submit" class="bg-teal-700 text-white rounded px-4 py-2 hover:bg-teal-800">Log in</button>
+        <button type="submit" id="login-submit" class="px-4 py-2 rounded-md bg-blue-700 text-white font-semibold hover:bg-blue-800 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">Log in</button>
       </form>
-      <p class="mt-4">New here? <a href="/signup" class="text-teal-700 underline">Sign up</a>.</p>
+      <p class="mt-4">New here? <a href="/signup" class="text-blue-700 underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">Sign up</a>.</p>
     </main>
   </body>
 </html>

@@ -181,6 +181,12 @@ For the audit the team checked the home, search, and listing pages using only th
 - **Fix:** Their colors were changed from `red-600` to `red-700`.
 - **Check:** Hover over Delete and each nav link and measure the text against its background with a contrast checker. The nav link hover now measures 5.91:1 and the Delete hover measures 5.86:1.
 
+**8. Login and Signup Tailwind Implementation**
+
+- **Found:** The login and signup pages didn’t load Tailwind, the new nav links had no focus ring, and the header hover had reverted to red-600.
+- **Fix:** Linked output.css, matched the inputs and buttons to the rest of the site, added focus rings, and restored red-700.
+- **Check:** Tab through /login and /signup, logged out and logged in.
+
 #### Checked, no change needed
 
 - Body text
