@@ -2,26 +2,28 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content= "width=device-width, initial-scale=1">
     <title><%= title %></title>
+    <link rel="stylesheet" href="/output.css">
     <link rel="stylesheet" href="/style.css">
   </head>
-  <body>
+  <body class="bg-[#f3f6f8] text-[#1b2430] font-sans leading-loose">
     <%- include('partials/header') %>
-    <main>
-      <h2 class="text-lg font-bold mb-4">Sign up</h2>
+    <main class= "max-w-[45rem] mx-auto px-4 py-8">
+      <h1 class="text-2xl font-bold mb-4">Sign up</h1>
       <form method="POST" action="/signup" class="flex flex-col gap-3 max-w-sm">
         <% if (error) { %>
           <p id="form-error" role="alert" class="text-red-700"><%= error %></p>
         <% } %>
         <label for="signup-email" class="flex flex-col gap-1">Email
-          <input type="email" id="signup-email" name="email" value="<%= email %>" autocomplete="email" required class="form-input">
+          <input type="email" id="signup-email" name="email" value="<%= email %>" autocomplete="email" required class="w-full px-4 py-2 border border-[#2b2a2a] rounded-[5px] bg-white">
         </label>
         <label for="signup-password" class="flex flex-col gap-1">Password
-          <input type="password" id="signup-password" name="password" autocomplete="new-password" required class="form-input">
+          <input type="password" id="signup-password" name="password" autocomplete="new-password" required class="w-full px-4 py-2 border border-[#2b2a2a] rounded-[5px] bg-white">
         </label>
-        <button type="submit" id="signup-submit" class="bg-teal-700 text-white rounded px-4 py-2 hover:bg-teal-800">Sign up</button>
+        <button type="submit" id="signup-submit" class="px-4 py-2 rounded-md bg-blue-700 text-white font-semibold hover:bg-blue-800 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">Sign up</button>
       </form>
-      <p class="mt-4">Already have an account? <a href="/login" class="text-teal-700 underline">Log in</a>.</p>
+      <p class="mt-4">Already have an account? <a href="/login" class="text-blue-700 underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">Log in</a>.</p>
     </main>
   </body>
 </html>
