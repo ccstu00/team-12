@@ -22,13 +22,34 @@ In your terminal:
 
 1. git clone https://github.com/ccstu00/team-12.git
 2. cd team-12
-3. npm install
-4. npm run build:css
-5. npm start
+3. run these commands in the terminal:
+   - cp .env.example .env
+   - open .env and set SESSION_SECRET to a random string
+   - dc-up mongo
+4. npm install
+5. npm run build:css
+6. npm start
 
 The server should be on http://localhost:3000 in your browser.
 
 ## HOW TO USE:
+
+### Sign up
+1. Go to http://localhost:3000/signup
+2. Enter in an email and create a password
+3. Click the sign up button
+
+### Log in
+1. Go to http://localhost:3000/login
+2. Enter your email and password
+3. Click the log in button
+4. The navigation bar will display the user who is logged in
+
+### Admin Account
+1. Create an account using the sign up instructions
+2. Connect to MongoDB by running mongo-dev in the terminal
+3. Update the existing user's role with db.users.updateOne({ email: "admin@example.com" }, { $set: { role: "admin" } }), replacing admin@example.com with the email used in step 1
+4. Verify using db.users.findOne({ email: "admin@example.com" })
 
 ### Posting a listing:
 
@@ -194,6 +215,9 @@ For the audit the team checked the home, search, and listing pages using only th
 
 - **Check:** With the server running, run `curl -i http://localhost:3000/health`. It returns a `200` with `Content-Type: application/json` and a body like `{"status":"ok","uptime":3.69}`.
 
+### Authentication
+We chose session-based authentication using express session and connect mongo because it allows for server side revocation
+
 DESIGN DECISIONS:
 
 - Ceana Tran(Sprint 2): I can account for the postListing features’ layering. Transparently, I followed the Unit 11’s split for this feature’s layout, but there was an aspect of the code I modified to better fit the goals of this website which is in postListingRepository.js, with the entrySchema. In our team’s view, a marketplace listing typically requires two fields: the name of the listing and its price. The description is useful but unnecessary for the item to be posted on the marketplace. This version is better than forcing sellers to write an item description, because if there’s too many requirements in the way of posting the item, people wouldn’t be incentivized to post on our website as opposed to other marketplace sites. We could have also made the entry only require a title, but that means that the buyer has to message the seller about the price, which seems inefficient if a marketplace can’t display the price of the item on the posting itself. The schema rules live inside the postListingRepository because it must interact with the MongoDB database since it interacts with the entire marketplace’s database of listings, and the postListingRepository is the only file that imports MongoDB. A credible alternative to MongoDB is simply using JSON files. With JSON files, we can read and write data directly without having to connect to MongoDB or establishing an internet connection at all . This falls short to our current choice of using MongoDB, because the users must interact with one another on an established connection, and marketplace listings will be revised or posted on many machines, so at scale, reading and writing to JSON files would cause lost data under a website refresh, so if two people were to buy an item at the same time, it would cause unnecessary user complaints on lost money and ownership of the sold item.
@@ -215,6 +239,8 @@ Ceana Tran(Sprint 3): I used mockRepository because we'd have to run a real data
 - Ann Marie Nguyen: Our team used includes() to match search results. While testing the search bar, I created listings for “hat” and “chair.” Then I searched for “ha” in particular, which returned both listings since both words contain those letters in that order. It made me reconsider whether the search should match the text anywhere or only at the beginning, which is the difference between using includes() and startsWith(). While both includes() and startsWith() have their own tradeoffs, includes() is more flexible, whereas startsWith() is stricter. For example, an alternative like startsWith() would return “hat” for the search “ha,” but a search for “hat” would miss a listing like “green hat” because the listing starts with “green.” The tradeoff with using includes() would be returning unrelated listings like “chair” and as the number of posts increases, this can become an issue in terms of scaling. Even though includes() means some listings might not match what a user is looking for, it’s better to see everything and skip those listings manually than to use startsWith(), which would completely hide relevant listings just because they don’t match the start exactly.
 
 Ann Marie Nguyen (Sprint 3): Decided to add the delete operation using HTMX because it removes listings without refreshing the whole page and reduces the amount of manual javascript. For an app like our marketplace where users can create multiple listings, it's not necessary to reload the entire page when only one post needs to be removed, making this version better than the original version, which reloads the entire page every time a listing is deleted. Using HTMX allows for specific parts of the page to be updated without affecting anything else. HTMX also replaces several lines of code with short and simple attributes, such as hx-confirm for the confirmation dialogue, hx-delete for the delete request, and hx-target and hx-swap for removing the listing. The cost of the alternative (writing client side javascript) is that it required over 20 lines of code in public/app.js to listen for clicks, find the button clicked and ID for the listing, confirm the deletion, use fetch() to send the request, handle errors, and reload the page.
+
+Ann Marie Nguyen (Sprint 4): Decided on session-based authentication and the alternative would've been token-based authentication. The benefit of using sessions is immediate revocation whereas a JWT token is valid until it expires. This is helpful as it helps prevent unauthorized access since the server is the source of truth and deleting a session would log out users immediately. This is valuable for the application as the target group is the UMass community, meaning students would be interacting through a browser frequently and sometimes on shared devices. Because tokens are valid until they expire, revoking them earlier would mean having to reintroduce the shared server side state.
 
 ## System Diagram
 
