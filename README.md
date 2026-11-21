@@ -22,13 +22,34 @@ In your terminal:
 
 1. git clone https://github.com/ccstu00/team-12.git
 2. cd team-12
-3. npm install
-4. npm run build:css
-5. npm start
+3. run these commands in the terminal:
+   - cp .env.example .env
+   - open .env and set SESSION_SECRET to a random string
+   - dc-up mongo
+4. npm install
+5. npm run build:css
+6. npm start
 
 The server should be on http://localhost:3000 in your browser.
 
 ## HOW TO USE:
+
+### Sign up
+1. Go to http://localhost:3000/signup
+2. Enter in an email and create a password
+3. Click the sign up button
+
+### Log in
+1. Go to http://localhost:3000/login
+2. Enter your email and password
+3. Click the log in button
+4. The navigation bar will display the user who is logged in
+
+### Admin Account
+1. Create an account using the sign up instructions
+2. Connect to MongoDB by running mongo-dev in the terminal
+3. Update the existing user's role with db.users.updateOne({ email: "admin@example.com" }, { $set: { role: "admin" } }), replacing admin@example.com with the email used in step 1
+4. Verify using db.users.findOne({ email: "admin@example.com" })
 
 ### Posting a listing:
 
@@ -200,43 +221,8 @@ For the audit the team checked the home, search, and listing pages using only th
 
 - **Check:** With the server running, run `curl -i http://localhost:3000/health`. It returns a `200` with `Content-Type: application/json` and a body like `{"status":"ok","uptime":3.69}`.
 
-### Authorization
-
-Updated so that anyone can view site listings. Logged in users can post, modify, or edit their own postings, with admins/moderators being able to modify anything that the users can make.
-
-To create an admin/ moderator: Signup always creates a `member`. A `role` field sent with the signup form is ignored. To make an admin, sign up then go to:
-
-```
-mongosh "mongodb://dev:devpassword@mongo:27017/devdb?authSource=admin" --eval 'db.users.updateOne({ email: "ann@umass.edu" }, { $set: { role: "admin" } })'
-```
-
-The new role will be applied after the user's next request. For tests, the tests for creating usernames (and one admin) are as follows:
-
-```
-curl -X POST http://localhost:3000/signup -H "Content-Type: application/json" -d '{"email":"simon@umass.edu","password":"simontougs"}'
-curl -X POST http://localhost:3000/signup -H "Content-Type: application/json" -d '{"email":"jacob@umass.edu","password":"jacoba11en67"}'
-curl -X POST http://localhost:3000/signup -H "Content-Type: application/json" -d '{"email":"ann@umass.edu","password":"annmarienguy3n"}'
-```
-
-Given these criteria, tests for the users and admins should return the following:
-
-1. **NO account: `401`:**
-   `curl -i -X POST http://localhost:3000/listings -H "Content-Type: application/json" -d '{"listing":"lamp","amount":5}'`
-2. **Jacob creates a listing: `201`.** Copy the `id` from the response:
-   `curl -c jacob.txt -X POST http://localhost:3000/login -H "Content-Type: application/json" -d '{"email":"jacob@umass.edu","password":"jacoba11en67"}'`
-   `curl -b jacob.txt -X POST http://localhost:3000/listings -H "Content-Type: application/json" -d '{"listing":"lamp","amount":5}'`
-3. **Simon tries to edit and delete it: `403` both instances:**
-   `curl -c simon.txt -X POST http://localhost:3000/login -H "Content-Type: application/json" -d '{"email":"simon@umass.edu","password":"simontougs"}'`
-   `curl -i -b simon.txt -X PUT http://localhost:3000/listings/<id> -H "Content-Type: application/json" -d '{"listing":"mine now","amount":1}'`
-   `curl -i -b simon.txt -X DELETE http://localhost:3000/listings/<id>`
-   Open `/listings` to confirm the lamp is still there, unchanged.
-4. **Ann deletes it: `200`:**
-   `curl -c ann.txt -X POST http://localhost:3000/login -H "Content-Type: application/json" -d '{"email":"ann@umass.edu","password":"annmarienguy3n"}'`
-   `curl -i -b ann.txt -X DELETE http://localhost:3000/listings/<id>`
-
-In the browser: log in as Jacob in one window and as Simon in a private window, and have each add a listing. Each user sees Edit and Delete only on their own listing. Logged in as Ann (the admin), you see them on every listing.
-
-To test: run `npm test`, which runs `__tests__/postListingService.test.js` (`describe("authorization")`) with the repositories mocked and no database needed. A nonowner gets the `403` on update and delete, the owner and an admin succeed, and the owner always comes from the logged-in user.
+### Authentication
+We chose session-based authentication using express session and connect mongo because it allows for server side revocation
 
 DESIGN DECISIONS:
 
@@ -261,6 +247,8 @@ Ceana Tran (Sprint 4): I put the check for who can edit or delete a listing insi
 - Ann Marie Nguyen: Our team used includes() to match search results. While testing the search bar, I created listings for “hat” and “chair.” Then I searched for “ha” in particular, which returned both listings since both words contain those letters in that order. It made me reconsider whether the search should match the text anywhere or only at the beginning, which is the difference between using includes() and startsWith(). While both includes() and startsWith() have their own tradeoffs, includes() is more flexible, whereas startsWith() is stricter. For example, an alternative like startsWith() would return “hat” for the search “ha,” but a search for “hat” would miss a listing like “green hat” because the listing starts with “green.” The tradeoff with using includes() would be returning unrelated listings like “chair” and as the number of posts increases, this can become an issue in terms of scaling. Even though includes() means some listings might not match what a user is looking for, it’s better to see everything and skip those listings manually than to use startsWith(), which would completely hide relevant listings just because they don’t match the start exactly.
 
 Ann Marie Nguyen (Sprint 3): Decided to add the delete operation using HTMX because it removes listings without refreshing the whole page and reduces the amount of manual javascript. For an app like our marketplace where users can create multiple listings, it's not necessary to reload the entire page when only one post needs to be removed, making this version better than the original version, which reloads the entire page every time a listing is deleted. Using HTMX allows for specific parts of the page to be updated without affecting anything else. HTMX also replaces several lines of code with short and simple attributes, such as hx-confirm for the confirmation dialogue, hx-delete for the delete request, and hx-target and hx-swap for removing the listing. The cost of the alternative (writing client side javascript) is that it required over 20 lines of code in public/app.js to listen for clicks, find the button clicked and ID for the listing, confirm the deletion, use fetch() to send the request, handle errors, and reload the page.
+
+Ann Marie Nguyen (Sprint 4): Decided on session-based authentication and the alternative would've been token-based authentication. The benefit of using sessions is immediate revocation whereas a JWT token is valid until it expires. This is helpful as it helps prevent unauthorized access since the server is the source of truth and deleting a session would log out users immediately. This is valuable for the application as the target group is the UMass community, meaning students would be interacting through a browser frequently and sometimes on shared devices. Because tokens are valid until they expire, revoking them earlier would mean having to reintroduce the shared server side state.
 
 ## System Diagram
 
