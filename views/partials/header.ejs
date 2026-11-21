@@ -1,18 +1,19 @@
 <header class="max-w-[45rem] mx-auto px-4 pt-4 pb-2 mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 border-b-2 border-gray-300">
   <h1 class="text-2xl font-bold">UMASS Marketplace</h1>
+  <% const vizRing = "rounded-full px-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"; %>
   <nav class="flex gap-4">
-    <a href="/" class="hover:text-red-600">Home</a>
-    <a href="/listings" class="hover:text-red-600">Add Listing</a>
-
+    <a href="/" class="hover:text-red-700 <%= vizRing %>">Home</a>
+    <a href="/listings" class="hover:text-red-700 <%= vizRing %>">Add Listing</a>
+    <a href="/search" class="hover:text-red-700 <%= vizRing %>">Search</a>
     <% if (locals.user) { %>
       <span id="signed-in" class="text-gray-700">Signed in as <%= user.email %></span>
       <%# Logging out changes state, so it is a POST from a form, never a link. %>
       <form method="POST" action="/logout">
-        <button type="submit" id="logout" class="hover:text-red-600">Log out</button>
+        <button type="submit" id="logout" class="hover:text-red-700 cursor-pointer <%= vizRing %>">Log out</button>
       </form>
     <% } else { %>
-      <a href="/login" id="login-link" class="hover:text-red-600">Log in</a>
-      <a href="/signup" id="signup-link" class="hover:text-red-600">Sign up</a>
+      <a href="/login" id="login-link" class="hover:text-red-700 <%= vizRing %>">Log in</a>
+      <a href="/signup" id="signup-link" class="hover:text-red-700 <%= vizRing %>">Sign up</a>
     <% } %>
   </nav>
 </header>

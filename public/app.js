@@ -80,12 +80,17 @@ document.addEventListener("htmx:beforeSwap", (event)=>{
   const item = event.detail.target
   const near = item.nextElementSibling || item.previousElementSibling
 
-  let next
-  if(near){
-    next =near.querySelector(".delete-btn")
-
-  }else{
-    next = document.querySelector('input[name="listing"]')
+  // ---------------
+  // A neighbour may belong to someone else and have no Delete button, and a
+  // logged-out page has no add form, so fall back step by step.
+  const next =
+    near?.querySelector(".delete-btn") ||
+    near?.querySelector("h2") ||
+    document.querySelector('input[name="listing"]') ||
+    document.querySelector("main h1")
+  if(next && !next.hasAttribute("tabindex") && !next.matches("button, input")){
+    next.setAttribute("tabindex", "-1")
   }
-  setTimeout(()=>next.focus(), 0)
+  setTimeout(()=>next?.focus(), 0)
+  // ---------------
 })

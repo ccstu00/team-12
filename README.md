@@ -202,6 +202,12 @@ For the audit the team checked the home, search, and listing pages using only th
 - **Fix:** Their colors were changed from `red-600` to `red-700`.
 - **Check:** Hover over Delete and each nav link and measure the text against its background with a contrast checker. The nav link hover now measures 5.91:1 and the Delete hover measures 5.86:1.
 
+**8. Login and Signup Tailwind Implementation**
+
+- **Found:** The login and signup pages didn’t load Tailwind, the new nav links had no focus ring, and the header hover had reverted to red-600.
+- **Fix:** Linked output.css, matched the inputs and buttons to the rest of the site, added focus rings, and restored red-700.
+- **Check:** Tab through /login and /signup, logged out and logged in.
+
 #### Checked, no change needed
 
 - Body text
@@ -224,6 +230,8 @@ DESIGN DECISIONS:
 
 Ceana Tran(Sprint 3): I used mockRepository because we'd have to run a real database live, and there's also the additional step of removing the test listings after the test cases have been run in the database, which can be tedious. The mockRepository is a throwaway repository and doesn't leave anything behind to remove later, which makes it faster to test. For the truncating cents update, this is more optimal because the alternative, which was rounding the decimal place if the decimal place was 5 or greater, doesn't make sense because it should cap at 2 decimals which make the other numbers invalid. Next sprint, I'll make it so that the user can only type up to 2 decimals instead of dropping decimals, because it's strange to be able to type more than 2 decimals for cash. If a seller saw the rounding policy, it would be strange because it would be different from other marketplaces that cannot have greater than 2 decimal places, and for the user, they would be confused if they show the price for more than what they typed in, say 3.456 to 3.46 instead.
 
+Ceana Tran (Sprint 4): I put the check for who can edit or delete a listing inside postListingService.js instead of making a separate middleware on the route. The alternative was a requireOwner middleware that looks up the listing before the controller runs, which would also stop Simon from deleting Jacob's listing. I went with the service because updateEntry and deleteEntry already look up the listing to send a 404 if it doesn't exist, so checking the owner right after that doesn't need another trip to the database, and the 404 and the 403 come back the same way. It also made it easy to test, since we already mock the repository from Sprint 3, so the test just has to check that a non-owner gets a 403 and the owner and the admin don't, without running a real database. requireLogin still goes on the route, because checking if someone is logged in doesn't need the listing at all. If we had used the middleware, every edit and delete would look up the listing twice, and if someone added a new route later and forgot the middleware, any logged-in user could change anyone's listing, which is a bigger problem for a marketplace where people's prices and items are on the line. Next sprint, I'd like to show the user a clearer message on the page when they get a 403 instead of just an alert, because it's confusing to click something and have nothing happen.
+
 - Jacob Allen (Sprint 2): Blank search shows everything. If someone searches with nothing typed in, the service returns every listing instead of an error. The other option was treating a blank search like bad input and sending back a 400 saying a search term is required. I went with showing everything because going to the search page with nothing typed should just be a 'browsing' mode, not an error. The 400 version would make users type something just to see what’s for sale, and the frontend would need extra handling for that error, so ultimately having a blank search show everything was the way to go for our application.
 
 - Jacob Allen (Sprint 3): Search tests use a mocked repository instead of a real database. The other option was testing against a real MongoDB with test listings inserted. I went with the mock because the tests only need to check the search rules, and they run instantly with no database. The real database version would make everyone run Mongo just to run npm test and would leave test listings behind in the database.
@@ -245,35 +253,64 @@ Ann Marie Nguyen (Sprint 4): Decided on session-based authentication and the alt
 ## System Diagram
 
 ```
-            Browser (home.ejs, postListing.ejs, search.ejs)
-                 |                    |                   |
-          /listings              /search?q=            /health
-                 |                    |                   |
-                 v                    v                   v
-            server.js (renders home.ejs for /, mounts the three routers, error handler)
-                 |                    |                   |
-Routes      postListing.js        search.js          health.js
-                 |                    |                   |
-Controller  postListingController searchController  healthController
-                 |                    |             (sends {"status":"ok"},
-                 |                    |              no service or database)
-                 |                    |
-Service     postListingService    searchService      <-- Jest tests (__tests__/)
-             (validates listing)   (validates             postListingService.test.js
-                 |                  search, filters)      searchService.test.js
-                 |                    |                   repo mocked with jest,
-                 |                    |                   no database
+            Browser (home.ejs, login.ejs, signup.ejs, postListing.ejs, search.ejs)
+                 |                      |                   |
+          /listings                 /search?q=            /health
+                 |                      |                   |
+                 v                      v                   v
+            server.js (renders home.ejs for /, mounts the routers, error handler)
+            + express-session with connect-mongo (signed cookie, SESSION_SECRET)
+            + attachUser middleware (reads req.session.userId, sets req.user)
+                 |                      |                   |
+Routes      postListing.js         search.js          health.js
+            (requireLogin on            |                   |
+             POST/PUT/DELETE)           |                   |
+                 |                      |                   |
+Controller  postListingController   searchController    healthController
+                 |                      |             (sends {"status":"ok"},
+                 |                      |              no service or database)
+                 |                      |
+Service     postListingService      searchService      <-- Jest tests (__tests__/)
+             (validates listing,    (validates            postListingService.test.js
+              isOwnerOrAdmin        search, filters)      (incl. owner/admin 403 tests)
+              check -> 403)             |                 searchService.test.js
+                 |                      |                 repos mocked with jest,
+                 |                      |                 no database
 Repository  postListingRepository <- searchRepository
-                 |                 (uses the same Entry model)
+            (Entry has ownerId)    (uses the same Entry model)
+                 |
                  v
-              MongoDB
+              MongoDB (listings, users, sessions)
+
+
+        Browser -> server.js -> Auth (/signup, /login, /logout, /me)
+                      |
+Routes            auth.js
+                      |
+Controller        authController    (starts the session on signup and login,
+                      |              destroys it on logout, /me reads
+                      |              usersRepository directly)
+                      |
+Service           authService       (bcrypt.hash on signup, bcrypt.compare on
+                      |              login, role always defaults to member)
+                      |
+Repository        usersRepository   <-- also used by attachUser, and by
+                      |                 postListingService to look up admin role
+                      |
+Model             models/userModel.js (User: email, passwordHash,
+                      |                role member or admin, default member)
+                      v
+            MongoDB (same database as above)
 
 
   The response goes back up the same path and the
   controller renders the page (or sends a 400 if
-  validation fails).
+  validation fails, a 401 from requireLogin if not
+  logged in, or a 403 from the service if you don't
+  own the listing and aren't an admin).
 
 
     Helpers: asyncHandler.js (wraps routes), result.js + dtos/entryDto.js
-  (used by services), views/partials/header.ejs, public/app.js (browser)
+  + dtos/userDto.js (used by services), views/partials/header.ejs,
+  public/app.js (browser)
 ```

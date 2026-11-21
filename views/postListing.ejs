@@ -14,7 +14,7 @@
     <%- include('partials/header') %>
     <main class="max-w-[45rem] mx-auto px-4 py-8">
       <h1 class="text-2xl font-bold mb-4"><%= title %></h1>
-
+      <% if (locals.user) { %>
       <form method="POST" action= "/listings/classic" class="grid gap-3 max-w-[30rem]">
         <label>
           <span class="sr-only">Listing</span>
@@ -31,6 +31,11 @@
         <button type= "submit" class="px-4 py-2 rounded-md bg-blue-700 text-white font-semibold hover:bg-blue-800 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">Add listing</button>
 
       </form>
+      <%# --------------- %>
+      <% } else { %>
+        <p id="login-prompt" class="mb-6"><a href="/login" class="text-blue-700 underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">Log in</a> or <a href="/signup" class="text-blue-700 underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">Sign up</a> to add listings.</p>
+      <% } %>
+      <%# --------------- %>
       <% if (entries.length === 0){ %>
         <p class="mt-4"> No listings yet.</p>
       <%} else { %>
@@ -41,6 +46,11 @@
             <h2 class="text-lg font-semibold"><%= entry.listing %></h2>
             <p><%= entry.amount %></p>
             <p><%= entry.description %></p>
+            <%# --------------- %>
+            <%# Only the owner (or an admin) sees these. Hiding them is a courtesy:
+                the service still answers 403 to anyone else who sends the request. %>
+            <% if (entry.canChange) { %>
+            <%# --------------- %>
             <div class="flex gap-2 mt-2">
               <button type="button" class="delete-btn px-3 py-1 rounded-md border border-red-700 text-red-700 hover:bg-red-50 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700"
               hx-delete="/listings/<%= entry.id %>"
@@ -52,7 +62,11 @@
 
               <button type="button" class="edit-btn px-3 py-1 rounded-md border border-gray-400 hover:bg-gray-100 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700">Edit</button>
             </div>
+            <%# --------------- %>
+            <% } %>
           </div>
+          <% if (entry.canChange) { %>
+            <%# --------------- %>
           <form class="edit-form grid gap-3 max-w-[30rem]" hidden>
               <label>
                 <span class="sr-only">Listing</span>
@@ -72,6 +86,9 @@
               </div>
 
           </form>
+          <%# --------------- %>
+          <% } %>
+          <%# --------------- %>
           </li>
         <% }) %>
       </ul>

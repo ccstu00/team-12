@@ -5,6 +5,9 @@ const entrySchema = new mongoose.Schema(
     listing: { type: String, required: true },
     amount: { type: Number, required: true, min: 0 },
     description: { type: String, default: "" },
+    // ---------------
+    ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    // ---------------
   },
   { timestamps: true },
 );

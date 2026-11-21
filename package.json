@@ -29,9 +29,9 @@
     "mongoose": "^9.11.2"
   },
   "devDependencies": {
-    "@tailwindcss/cli": "^4.3.3",
+    "@tailwindcss/cli": "^4.3.5",
     "jest": "^30.5.2",
-    "tailwindcss": "^4.3.3"
+    "tailwindcss": "^4.3.5"
   },
   "allowScripts": {
     "bcrypt@6.0.0": true,
