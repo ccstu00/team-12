@@ -35,17 +35,20 @@ The server should be on http://localhost:3000 in your browser.
 ## HOW TO USE:
 
 ### Sign up
+
 1. Go to http://localhost:3000/signup
 2. Enter in an email and create a password
 3. Click the sign up button
 
 ### Log in
+
 1. Go to http://localhost:3000/login
 2. Enter your email and password
 3. Click the log in button
 4. The navigation bar will display the user who is logged in
 
 ### Admin Account
+
 1. Create an account using the sign up instructions
 2. Connect to MongoDB by running mongo-dev in the terminal
 3. Update the existing user's role with db.users.updateOne({ email: "admin@example.com" }, { $set: { role: "admin" } }), replacing admin@example.com with the email used in step 1
@@ -222,7 +225,46 @@ For the audit the team checked the home, search, and listing pages using only th
 - **Check:** With the server running, run `curl -i http://localhost:3000/health`. It returns a `200` with `Content-Type: application/json` and a body like `{"status":"ok","uptime":3.69}`.
 
 ### Authentication
+
 We chose session-based authentication using express session and connect mongo because it allows for server side revocation
+
+### Authorization
+
+Updated so that anyone can view site listings. Logged in users can post, modify, or edit their own postings, with admins/moderators being able to modify anything that the users can make.
+
+To create an admin/ moderator: Signup always creates a `member`. A `role` field sent with the signup form is ignored. To make an admin, sign up then go to:
+
+```
+mongosh "mongodb://dev:devpassword@mongo:27017/devdb?authSource=admin" --eval 'db.users.updateOne({ email: "ann@umass.edu" }, { $set: { role: "admin" } })'
+```
+
+The new role will be applied after the user's next request. For tests, the tests for creating usernames (and one admin) are as follows:
+
+```
+curl -X POST http://localhost:3000/signup -H "Content-Type: application/json" -d '{"email":"simon@umass.edu","password":"simontougs"}'
+curl -X POST http://localhost:3000/signup -H "Content-Type: application/json" -d '{"email":"jacob@umass.edu","password":"jacoba11en67"}'
+curl -X POST http://localhost:3000/signup -H "Content-Type: application/json" -d '{"email":"ann@umass.edu","password":"annmarienguy3n"}'
+```
+
+Given these criteria, tests for the users and admins should return the following:
+
+1. **NO account: `401`:**
+   `curl -i -X POST http://localhost:3000/listings -H "Content-Type: application/json" -d '{"listing":"lamp","amount":5}'`
+2. **Jacob creates a listing: `201`.** Copy the `id` from the response:
+   `curl -c jacob.txt -X POST http://localhost:3000/login -H "Content-Type: application/json" -d '{"email":"jacob@umass.edu","password":"jacoba11en67"}'`
+   `curl -b jacob.txt -X POST http://localhost:3000/listings -H "Content-Type: application/json" -d '{"listing":"lamp","amount":5}'`
+3. **Simon tries to edit and delete it: `403` both instances:**
+   `curl -c simon.txt -X POST http://localhost:3000/login -H "Content-Type: application/json" -d '{"email":"simon@umass.edu","password":"simontougs"}'`
+   `curl -i -b simon.txt -X PUT http://localhost:3000/listings/<id> -H "Content-Type: application/json" -d '{"listing":"mine now","amount":1}'`
+   `curl -i -b simon.txt -X DELETE http://localhost:3000/listings/<id>`
+   Open `/listings` to confirm the lamp is still there, unchanged.
+4. **Ann deletes it: `200`:**
+   `curl -c ann.txt -X POST http://localhost:3000/login -H "Content-Type: application/json" -d '{"email":"ann@umass.edu","password":"annmarienguy3n"}'`
+   `curl -i -b ann.txt -X DELETE http://localhost:3000/listings/<id>`
+
+In the browser: log in as Jacob in one window and as Simon in a private window, and have each add a listing. Each user sees Edit and Delete only on their own listing. Logged in as Ann (the admin), you see them on every listing.
+
+To test: run `npm test`, which runs `__tests__/postListingService.test.js` (`describe("authorization")`) with the repositories mocked and no database needed. A nonowner gets the `403` on update and delete, the owner and an admin succeed, and the owner always comes from the logged-in user.
 
 DESIGN DECISIONS:
 
